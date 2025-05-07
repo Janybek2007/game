@@ -1,0 +1,323 @@
+/* User page styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+body {
+  background-color: #131218;
+  color: white;
+  overflow-x: hidden;
+}
+
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header section styles */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background-color: #1c1a24;
+  border-radius: 10px;
+  padding: 15px 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-container {
+  margin-right: 15px;
+}
+
+.avatar-container img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #f3a45d;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.balance-container {
+  display: flex;
+  align-items: center;
+}
+
+.balance-icon {
+  color: #f3a45d;
+  font-size: 16px;
+  margin-right: 5px;
+}
+
+.balance {
+  color: #f3a45d;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.deposit-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.deposit-button:hover {
+  background-color: #45a049;
+}
+
+.action-buttons {
+  display: flex;
+}
+
+.back-button {
+  background-color: #f3a45d;
+  color: #1c1a24;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.back-button:hover {
+  background-color: #f7bf8c;
+}
+
+/* Navigation tabs styles */
+.nav-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  background-color: #1c1a24;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin-right: 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.tab:hover {
+  background-color: #292631;
+}
+
+.tab.active {
+  background-color: #292631;
+}
+
+.tab-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.item-count {
+  background-color: #292631;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.tab.active .item-count {
+  background-color: #f3a45d;
+  color: #1c1a24;
+}
+
+/* Inventory grid styles */
+.inventory-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.inventory-item {
+  background-color: #1c1a24;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.inventory-item:hover {
+  transform: translateY(-5px);
+}
+
+.item-price {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #f3a45d;
+  color: #1c1a24;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.item-image-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  background-color: #292631;
+}
+
+.item-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.item-details {
+  padding: 10px 15px;
+}
+
+.item-type {
+  color: #999;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.item-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.item-actions {
+  padding: 0 15px 15px;
+}
+
+.sell-button {
+  width: 100%;
+  background-color: #f3a45d;
+  color: #1c1a24;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 0;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.sell-button:hover {
+  background-color: #f7bf8c;
+}
+
+/* Show more button */
+.show-more {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+#show-more-btn {
+  background-color: transparent;
+  color: #f3a45d;
+  border: 2px solid #f3a45d;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#show-more-btn:hover {
+  background-color: rgba(243, 164, 93, 0.1);
+}
+
+/* Empty inventory message */
+.empty-inventory {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px 0;
+  color: #999;
+  font-size: 16px;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .action-buttons {
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  .back-button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .nav-tabs {
+    overflow-x: auto;
+    padding: 10px 5px;
+  }
+  
+  .tab {
+    white-space: nowrap;
+    margin-right: 10px;
+    padding: 8px 10px;
+  }
+  
+  .inventory-container {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .inventory-container {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+  
+  .avatar-container img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .nickname {
+    font-size: 16px;
+  }
+  
+  .balance, .balance-icon {
+    font-size: 14px;
+  }
+}

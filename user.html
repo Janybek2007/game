@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>User Inventory</title>
+		<link rel="stylesheet" href="user-style.css" />
+		<link rel="icon" href="logo.png" type="image/png" />
+	</head>
+	<body>
+		<div class="main-container">
+			<!-- Header section with user info -->
+			<div class="header-section">
+				<div class="user-info">
+					<div class="avatar-container">
+						<img id="user-avatar" src="" alt="User Avatar" />
+					</div>
+					<div class="user-details">
+						<div class="nickname" id="user-nickname"></div>
+						<div class="balance-container">
+							<div class="balance-icon">₽</div>
+							<div class="balance" id="user-balance">0.00</div>
+							<button class="deposit-button">ПОПОЛНИТЬ</button>
+						</div>
+					</div>
+				</div>
+				<div class="action-buttons">
+					<a href="index.html" class="back-button">К ОСНОВНОМУ</a>
+				</div>
+			</div>
+
+			<!-- Navigation tabs -->
+			<div class="nav-tabs">
+				<div class="tab active">
+					<img src="inventory-icon.png" alt="Inventory" class="tab-icon" />
+					<span>ПРЕДМЕТЫ</span>
+					<span class="item-count" id="inventory-count">0</span>
+				</div>
+				<div class="tab">
+					<img src="contacts-icon.png" alt="Contacts" class="tab-icon" />
+					<span>КОНТАКТЫ</span>
+					<span class="item-count">0</span>
+				</div>
+				<div class="tab">
+					<img src="upgrade-icon.png" alt="Upgrades" class="tab-icon" />
+					<span>АПГРЕЙДЫ</span>
+					<span class="item-count">0</span>
+				</div>
+				<div class="tab">
+					<img src="battles-icon.png" alt="Battles" class="tab-icon" />
+					<span>БИТВЫ</span>
+					<span class="item-count">0</span>
+				</div>
+			</div>
+
+			<!-- Inventory grid -->
+			<div class="inventory-container" id="inventory-grid">
+				<!-- Items will be dynamically inserted here -->
+			</div>
+
+			<!-- Show more button -->
+			<div class="show-more">
+				<button id="show-more-btn">ПОКАЗАТЬ ЕЩЕ</button>
+			</div>
+		</div>
+
+		<!-- Item template for JavaScript use -->
+		<template id="item-template">
+			<div class="inventory-item">
+				<div class="item-price"></div>
+				<div class="item-image-container">
+					<img class="item-image" src="" alt="Item" />
+				</div>
+				<div class="item-details">
+					<div class="item-type"></div>
+					<div class="item-name"></div>
+				</div>
+				<div class="item-actions">
+					<button class="sell-button">ПРОДАТЬ</button>
+				</div>
+			</div>
+		</template>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const urlParams = new URLSearchParams(window.location.search);
+				const sessionId = urlParams.get('session');
+
+				if (sessionId) {
+					sessionStorage.setItem('sessionId', sessionId);
+					console.log('Session ID saved:', sessionId);
+				}
+
+				const storedSessionId = sessionStorage.getItem('sessionId');
+
+				if (storedSessionId) {
+					fetch('https://jackhanmacsgolkgame.pythonanywhere.com/user', {
+						method: 'GET',
+						credentials: 'include',
+						headers: {
+							Authorization: `Session ${storedSessionId}`,
+							'Content-Type': 'application/json'
+						}
+					})
+						.then(r => {
+							if (!r.ok) {
+								throw new Error(`HTTP error! Status: ${r.status}`);
+							}
+							return r.json();
+						})
+						.then(data => {
+							// Handle data as array if needed
+							const userData = Array.isArray(data) ? data[0] : data;
+
+							// Update user profile information
+							document.getElementById('user-avatar').src =
+								userData.avatar_url || '';
+							document.getElementById('user-nickname').textContent =
+								userData.nickname || 'User';
+							document.getElementById('user-balance').textContent =
+								userData.balance || '0.00';
+
+							// Update inventory count
+							const inventoryCount = userData.inventory
+								? userData.inventory.length
+								: 0;
+							document.getElementById('inventory-count').textContent =
+								inventoryCount;
+
+							// Populate inventory grid
+							populateInventory(userData.inventory || []);
+						})
+						.catch(error => {
+							console.error('Error fetching user data:', error);
+						});
+				}
+			});
+
+			// Function to populate inventory grid with items
+			function populateInventory(inventory) {
+				const inventoryGrid = document.getElementById('inventory-grid');
+				const template = document.getElementById('item-template');
+
+				// Clear existing items
+				inventoryGrid.innerHTML = '';
+
+				// Add each inventory item to the grid
+				inventory.forEach(inventoryItem => {
+					const item = inventoryItem.item;
+					const itemElement = template.content.cloneNode(true);
+
+					// Set item details
+					itemElement.querySelector(
+						'.item-price'
+					).textContent = `${item.price}₽`;
+
+					// Set item image if available
+					const imageUrl =
+						item.item_image && item.item_image.length > 0
+							? item.item_image[0].image
+							: 'default-weapon.png';
+
+					itemElement.querySelector('.item-image').src = imageUrl;
+
+					// Set item type and name
+					itemElement.querySelector('.item-type').textContent = 'P2000';
+					itemElement.querySelector('.item-name').textContent = item.name;
+
+					// Add sell button event listener
+					itemElement
+						.querySelector('.sell-button')
+						.addEventListener('click', () => {
+							alert(`Selling item: ${item.name} for ${item.price}₽`);
+						});
+
+					// Add the item to the grid
+					inventoryGrid.appendChild(itemElement);
+				});
+
+				// If no items, show a message
+				if (inventory.length === 0) {
+					const emptyMessage = document.createElement('div');
+					emptyMessage.className = 'empty-inventory';
+					emptyMessage.textContent = 'У вас пока нет предметов в инвентаре';
+					inventoryGrid.appendChild(emptyMessage);
+				}
+			}
+
+			// Show more button functionality
+			document.getElementById('show-more-btn').addEventListener('click', () => {
+				alert('Загрузка дополнительных предметов...');
+			});
+		</script>
+	</body>
+</html>
