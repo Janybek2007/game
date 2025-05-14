@@ -1,335 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 	<head>
 		<title>GLDROP</title>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="additional-style.css" />
 		<link rel="icon" href="logo.png" type="image/png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap"
+			rel="stylesheet"
+		/>
 	</head>
-	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-			const translations = {
-				ru: {
-					title: 'GLDROP',
-					header: 'НАШИ СБОРКИ',
-					item1: 'm4a1-s',
-					price1: '179₽',
-					item2: 'm4a4',
-					price2: '289₽',
-					item3: 'awp',
-					price3: '349₽',
-					item4: 'ak-47',
-					price4: '225₽',
-					item5: 'AWP',
-					price5: '129₽',
-					login: 'ВОЙТИ',
-					language: 'Язык'
-				},
-				en: {
-					title: 'GLDROP',
-					header: 'OUR COLLECTIONS',
-					item1: 'm4a1-s',
-					price1: '$1.85',
-					item2: 'm4a4',
-					price2: '$2.98',
-					item3: 'awp',
-					price3: '$3.60',
-					item4: 'ak-47',
-					price4: '$2.32',
-					item5: 'AWP',
-					price5: '$1.33',
-					login: 'LOGIN',
-					language: 'Language'
-				},
-				fr: {
-					title: 'GLDROP',
-					header: 'NOS COLLECTIONS',
-					item1: 'm4a1-s',
-					price1: '€1.79',
-					item2: 'm4a4',
-					price2: '€2.89',
-					item3: 'awp',
-					price3: '€3.49',
-					item4: 'ak-47',
-					price4: '€2.25',
-					item5: 'AWP',
-					price5: '€1.29',
-					item6: 'AWP',
-					price6: '€1.29',
-					login: 'ENTER',
-					language: 'Langue'
-				},
-				pl: {
-					title: 'GLDROP',
-					header: 'NASZE KOLEKCJE',
-					item1: 'm4a1-s',
-					price1: '€1.79',
-					item2: 'm4a4',
-					price2: '€2.89',
-					item3: 'awp',
-					price3: '€3.49',
-					item4: 'ak-47',
-					price4: '€2.25',
-					item5: 'AWP',
-					price5: '€1.29',
-					item6: 'AWP',
-					price6: '€1.29',
-					login: 'ZALOGUJ SIĘ',
-					language: 'Język'
-				},
-				pt: {
-					title: 'GLDROP',
-					header: 'NOSSAS COLEÇÕES',
-					item1: 'm4a1-s',
-					price1: '€1.79',
-					item2: 'm4a4',
-					price2: '€2.89',
-					item3: 'awp',
-					price3: '€3.49',
-					item4: 'ak-47',
-					price4: '€2.25',
-					item5: 'AWP',
-					price5: '€1.29',
-					item6: 'AWP',
-					price6: '€1.29',
-					login: 'ENTRAR',
-					language: 'Idioma'
-				},
-				de: {
-					title: 'GLDROP',
-					header: 'UNSERE SAMMLUNGEN',
-					item1: 'm4a1-s',
-					price1: '€1.79',
-					item2: 'm4a4',
-					price2: '€2.89',
-					item3: 'awp',
-					price3: '€3.49',
-					item4: 'ak-47',
-					price4: '€2.25',
-					item5: 'AWP',
-					price5: '€1.29',
-					item6: 'AWP',
-					price6: '€1.29',
-					login: 'EINLOGGEN',
-					language: 'Sprache'
-				},
-				es: {
-					title: 'GLDROP',
-					header: 'NUESTRAS COLECCIONES',
-					item1: 'm4a1-s',
-					price1: '€1.79',
-					item2: 'm4a4',
-					price2: '€2.89',
-					item3: 'awp',
-					price3: '€3.49',
-					item4: 'ak-47',
-					price4: '€2.25',
-					item5: 'AWP',
-					price5: '€1.29',
-					item6: 'AWP',
-					price6: '€1.29',
-					login: 'INICIAR SESIÓN',
-					language: 'Idioma'
-				}
-			};
-
-			const languageButton = document.querySelector('.language-button');
-			const languageDropdown = document.querySelector('.language-dropdown');
-			const languageLinks = document.querySelectorAll('.language-dropdown a');
-			const arrowIcon = document.querySelector('.arrow-icon');
-
-			const toggleDropdown = () => {
-				languageDropdown.classList.toggle('show');
-			};
-
-			languageButton.addEventListener('click', toggleDropdown);
-			arrowIcon.addEventListener('click', toggleDropdown);
-
-			window.addEventListener('click', event => {
-				if (
-					!event.target.matches('.language-button') &&
-					!event.target.matches('.arrow-icon')
-				) {
-					if (languageDropdown.classList.contains('show')) {
-						languageDropdown.classList.remove('show');
-					}
-				}
-			});
-
-			languageLinks.forEach(link => {
-				link.addEventListener('click', event => {
-					event.preventDefault();
-					const lang = event.target.getAttribute('data-lang');
-					changeLanguage(lang);
-				});
-			});
-
-			function changeLanguage(lang) {
-				document.title = translations[lang].title;
-				document.querySelector('.header h5').innerText =
-					translations[lang].header;
-
-				const items = document.querySelectorAll('.cases');
-				items.forEach((item, index) => {
-					const itemName = translations[lang][`item${index + 1}`];
-					const itemPrice = translations[lang][`price${index + 1}`];
-					item.querySelector('h2').innerText = itemName;
-					item.querySelector('h3').innerText = itemPrice;
-				});
-
-				document.querySelector('.layer1 h4').innerText =
-					translations[lang].login;
-			}
-		});
-
-		document.addEventListener('DOMContentLoaded', () => {
-			const urlParams = new URLSearchParams(window.location.search);
-			const sessionId = urlParams.get('session');
-
-			if (sessionId) {
-				sessionStorage.setItem('sessionId', sessionId);
-				console.log('Session ID saved:', sessionId);
-			}
-
-			const storedSessionId = sessionStorage.getItem('sessionId');
-
-			if (storedSessionId) {
-				fetch('https://jackhanmacsgolkgame.pythonanywhere.com/user', {
-					method: 'GET',
-					credentials: 'include',
-					headers: {
-						Authorization: `Session ${storedSessionId}`,
-						'Content-Type': 'application/json'
-					}
-				})
-					.then(r => {
-						if (!r.ok) {
-							throw new Error(`HTTP error! Status: ${r.status}`);
-						}
-						return r.json();
-					})
-					.then(data => {
-						console.log('User data:', data);
-						// Hide login button
-						document.querySelector('.layer1').style.display = 'none';
-						
-						// Show user profile
-						const userProfile = document.getElementById('user-profile');
-						userProfile.classList.remove('user-profile-hidden');
-						
-						// Handle data as array if needed
-						const userData = Array.isArray(data) ? data[0] : data;
-						
-						// Update user information in the three views
-						document.getElementById('user-avatar').src = userData.avatar_url || '';
-						document.getElementById('user-nickname').textContent = userData.nickname || 'User';
-						document.getElementById('user-balance').textContent = userData.balance ? `${userData.balance}₽` : '0.00₽';
-					})
-					.catch(error => {
-						console.error('Error fetching user data:', error);
-					});
-			}
-		});
-	</script>
 	<body>
-		<div class="Logo">
-			<img src="logo.png" />
-		</div>
-		<div class="language-container">
-			<button class="language-button">
-				RU
-				<img
-					src="arrow.png"
-					alt="Arrow"
-					class="arrow-icon"
-					style="margin-left: 5px; margin-top: 2px"
-				/>
-			</button>
-			<div class="language-dropdown">
-				<a href="#" data-lang="ru">RU</a>
-				<a href="#" data-lang="en">EN</a>
-				<a href="#" data-lang="fr">FR</a>
-				<a href="#" data-lang="pl">PL</a>
-				<a href="#" data-lang="pt">PT</a>
-				<a href="#" data-lang="de">DE</a>
-				<a href="#" data-lang="es">ES</a>
+		<header>
+			<div class="Logo">
+				<img src="logo.png" alt="GLDROP Logo" />
 			</div>
-		</div>
-		<div class="layer1">
-			<a
-				href="https://jackhanmacsgolkgame.pythonanywhere.com/ru/steam/login"
-				class="pressed-button"
-			>
-				<img src="steam.png" class="button-icon" alt="Steam Icon" />
-				<h4 class="button-text">ВОЙТИ</h4>
+			<div class="language-container">
+				<button class="language-button">
+					RU
+					<img
+						src="arrow.png"
+						alt="Arrow"
+						class="arrow-icon"
+						style="margin-left: 5px; margin-top: 2px"
+					/>
+				</button>
+				<div class="language-dropdown">
+					<a href="#" data-lang="ru">RU</a>
+					<a href="#" data-lang="en">EN</a>
+					<a href="#" data-lang="fr">FR</a>
+					<a href="#" data-lang="pl">PL</a>
+					<a href="#" data-lang="pt">PT</a>
+					<a href="#" data-lang="de">DE</a>
+					<a href="#" data-lang="es">ES</a>
+				</div>
+			</div>
+			<div class="layer1">
+				<a
+					href="https://jackhanmacsgolkgame.pythonanywhere.com/ru/steam/login"
+					class="pressed-button"
+				>
+					<img src="steam.png" class="button-icon" alt="Steam Icon" />
+					<h4 class="button-text">ВОЙТИ</h4>
+				</a>
+			</div>
+			<a href="user.html" id="user-profile" class="user-profile-hidden">
+				<div class="profile-view">
+					<div class="profile-avatar">
+						<img id="user-avatar" src="" alt="User Avatar" />
+					</div>
+					<div class="profile-info">
+						<div class="profile-nickname" id="user-nickname"></div>
+						<div class="profile-balance" id="user-balance"></div>
+					</div>
+				</div>
 			</a>
-		</div>
-		<a href='user.html' id="user-profile" class="user-profile-hidden">
-			<div class="profile-view">
-				<div class="profile-avatar">
-					<img id="user-avatar" src="" alt="User Avatar" />
-				</div>
-				<div class="profile-info">
-					<div class="profile-nickname" id="user-nickname"></div>
-					<div class="profile-balance" id="user-balance"></div>
-				</div>
+		</header>
+		<main>
+			<div class="header">
+				<h5>НАШИ СБОРКИ</h5>
 			</div>
-		</>
-		<div class="header" style="margin-bottom: 30px">
-			<h5>НАШИ СБОРКИ</h5>
-		</div>
-		<div class="container">
-			<div class="cases">
-				<a href="index115.html"
-					><img src="m4a1-s.png" />
-					<h2>m4a1-s</h2>
-					<h3>179₽</h3></a
-				>
+			<div class="container"></div>
+		</main>
+		<footer>
+			<div class="footer-content">
+				<p>© 2025 GLDROP - All rights reserved</p>
 			</div>
-			<div class="cases">
-				<a href="index118.html"
-					><img src="m4a4.png" />
-					<h2>m4a4</h2>
-					<h3>289₽</h3></a
-				>
-			</div>
-			<div class="cases">
-				<a href="#"
-					><img src="awpcase.png" />
-					<h2>awp</h2>
-					<h3>349₽</h3></a
-				>
-			</div>
-			<div class="cases">
-				<a href="#"
-					><img src="ak1.png" />
-					<h2>ak-47</h2>
-					<h3>225₽</h3></a
-				>
-			</div>
-			<div class="cases">
-				<a href="#"
-					><img src="galil.png" />
-					<h2>galil</h2>
-					<h3>129₽</h3></a
-				>
-			</div>
-			<div class="cases">
-				<a href="#"
-					><img src="awpcase.png" />
-					<h2>AWP</h2>
-					<h3>129₽</h3></a
-				>
-			</div>
-		</div>
-		<!--
-<div class="image-container">
-      <img src="vk.png" alt="Image 1" class="image" id="image1">
-      <img src="vk2.png" alt="Image 2" class="image" id="image2">
-  </div>
-  <div class="image-container2">
-        <img src="telega.png" alt="Image 1" class="image2" id="image1">
-        <img src="telega2.png" alt="Image 2" class="image2" id="image2">
-    </div>-->
+		</footer>
+
+		<script src="./scripts/language.js"></script>
+		<script src="./scripts/to-user.js"></script>
+		<script src="./scripts/to-cases.js"></script>
+		<script>
+			toCases(cases => {
+				const container = document.querySelector('.container');
+				if (Array.isArray(cases)) {
+					cases.forEach(_case => {
+						const caseElement = document.createElement('a');
+						caseElement.classList.add('cases');
+						caseElement.href = `case.html?id=${_case.id}`;
+						caseElement.style.textDecoration = 'none';
+						caseElement.innerHTML = `
+						<div class="case-image">
+							<img src="${_case.image}" alt="${_case.name}" />
+						</div>
+						<h2>${_case.name}</h2>
+						<h3>${_case.price}₽</h3>
+					`;
+						container.appendChild(caseElement);
+					});
+				}
+			});
+			toUser(user => {
+				if (user) {
+					document.querySelector('.layer1').style.display = 'none';
+
+					const userProfile = document.getElementById('user-profile');
+					userProfile.classList.remove('user-profile-hidden');
+
+					const userData = Array.isArray(user) ? user[0] : user;
+
+					document.getElementById('user-avatar').src =
+						userData.avatar_url || '';
+					document.getElementById('user-nickname').textContent =
+						userData.nickname || 'User';
+					document.getElementById('user-balance').textContent = userData.balance
+						? `${userData.balance}₽`
+						: '0.00₽';
+				}
+			});
+		</script>
 	</body>
 </html>

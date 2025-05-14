@@ -9,7 +9,6 @@
 	</head>
 	<body>
 		<div class="main-container">
-			<!-- Header section with user info -->
 			<div class="header-section">
 				<div class="user-info">
 					<div class="avatar-container">
@@ -29,7 +28,6 @@
 				</div>
 			</div>
 
-			<!-- Navigation tabs -->
 			<div class="nav-tabs">
 				<div class="tab active">
 					<img src="inventory-icon.png" alt="Inventory" class="tab-icon" />
@@ -53,18 +51,13 @@
 				</div>
 			</div>
 
-			<!-- Inventory grid -->
-			<div class="inventory-container" id="inventory-grid">
-				<!-- Items will be dynamically inserted here -->
-			</div>
+			<div class="inventory-container" id="inventory-grid"></div>
 
-			<!-- Show more button -->
 			<div class="show-more">
 				<button id="show-more-btn">ПОКАЗАТЬ ЕЩЕ</button>
 			</div>
 		</div>
 
-		<!-- Item template for JavaScript use -->
 		<template id="item-template">
 			<div class="inventory-item">
 				<div class="item-price"></div>
@@ -81,103 +74,101 @@
 			</div>
 		</template>
 
+		
+		<style>
+			.disabled-button {
+				background-color: #888;
+				cursor: not-allowed;
+				opacity: 0.7;
+			}
+			.item-status {
+				color: #ff9800;
+				font-size: 12px;
+				margin-top: 5px;
+				font-weight: bold;
+			}
+		</style>
+		<script src="./scripts/to-user.js"></script>
 		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				const urlParams = new URLSearchParams(window.location.search);
-				const sessionId = urlParams.get('session');
+			let sessionHeader = null;
+			toUser((user, sessionId) => {
+				sessionHeader = sessionId;
+				if (user) {
+					const userData = Array.isArray(user) ? user[0] : user;
 
-				if (sessionId) {
-					sessionStorage.setItem('sessionId', sessionId);
-					console.log('Session ID saved:', sessionId);
-				}
+					document.getElementById('user-avatar').src =
+						userData.avatar_url || '';
+					document.getElementById('user-nickname').textContent =
+						userData.nickname || 'User';
+					document.getElementById('user-balance').textContent =
+						userData.balance || '0.00';
 
-				const storedSessionId = sessionStorage.getItem('sessionId');
+					const inventoryCount = userData.inventory
+						? userData.inventory.length
+						: 0;
+					document.getElementById('inventory-count').textContent =
+						inventoryCount;
 
-				if (storedSessionId) {
-					fetch('https://jackhanmacsgolkgame.pythonanywhere.com/user', {
-						method: 'GET',
-						credentials: 'include',
-						headers: {
-							Authorization: `Session ${storedSessionId}`,
-							'Content-Type': 'application/json'
-						}
-					})
-						.then(r => {
-							if (!r.ok) {
-								throw new Error(`HTTP error! Status: ${r.status}`);
-							}
-							return r.json();
-						})
-						.then(data => {
-							// Handle data as array if needed
-							const userData = Array.isArray(data) ? data[0] : data;
-
-							// Update user profile information
-							document.getElementById('user-avatar').src =
-								userData.avatar_url || '';
-							document.getElementById('user-nickname').textContent =
-								userData.nickname || 'User';
-							document.getElementById('user-balance').textContent =
-								userData.balance || '0.00';
-
-							// Update inventory count
-							const inventoryCount = userData.inventory
-								? userData.inventory.length
-								: 0;
-							document.getElementById('inventory-count').textContent =
-								inventoryCount;
-
-							// Populate inventory grid
-							populateInventory(userData.inventory || []);
-						})
-						.catch(error => {
-							console.error('Error fetching user data:', error);
-						});
+					populateInventory(userData.inventory || []);
 				}
 			});
-
-			// Function to populate inventory grid with items
 			function populateInventory(inventory) {
 				const inventoryGrid = document.getElementById('inventory-grid');
 				const template = document.getElementById('item-template');
 
-				// Clear existing items
 				inventoryGrid.innerHTML = '';
 
-				// Add each inventory item to the grid
 				inventory.forEach(inventoryItem => {
 					const item = inventoryItem.item;
 					const itemElement = template.content.cloneNode(true);
 
-					// Set item details
-					itemElement.querySelector(
-						'.item-price'
-					).textContent = `${item.price}₽`;
+					// Display price if available
+					if (inventoryItem.price_for_sale) {
+						itemElement.querySelector(
+							'.item-price'
+						).textContent = `${inventoryItem.price_for_sale}₽`;
+					} else {
+						itemElement.querySelector(
+							'.item-price'
+						).textContent = `${item.price || '0.00'}₽`;
+					}
 
-					// Set item image if available
 					const imageUrl =
 						item.item_image && item.item_image.length > 0
 							? item.item_image[0].image
 							: 'default-weapon.png';
 
-					itemElement.querySelector('.item-image').src = imageUrl;
+					itemElement.querySelector('.item-image').src =
+						imageUrl.includes('http')
+							? imageUrl
+							: `https://jackhanmacsgolkgame.pythonanywhere.com${imageUrl}`;
 
-					// Set item type and name
 					itemElement.querySelector('.item-type').textContent = 'P2000';
 					itemElement.querySelector('.item-name').textContent = item.name;
 
-					// Add sell button event listener
-					itemElement
-						.querySelector('.sell-button')
-						.addEventListener('click', () => {
-							alert(`Selling item: ${item.name} for ${item.price}₽`);
+					// Check item status
+					const sellButton = itemElement.querySelector('.sell-button');
+					if (inventoryItem.status === 'продан' || inventoryItem.status) {
+						// Item is already for sale or has another status
+						sellButton.textContent = 'ПРОДАНО';
+						sellButton.disabled = true;
+						sellButton.classList.add('disabled-button');
+						
+						// Add status indicator
+						const statusDiv = document.createElement('div');
+						statusDiv.className = 'item-status';
+						statusDiv.textContent = inventoryItem.status || 'Статус неизвестен';
+						itemElement.querySelector('.item-details').appendChild(statusDiv);
+					} else {
+						// Item can be sold
+						sellButton.addEventListener('click', () => {
+							sellItem(inventoryItem.id, item.name, item.price);
 						});
+					}
 
-					// Add the item to the grid
 					inventoryGrid.appendChild(itemElement);
 				});
 
-				// If no items, show a message
 				if (inventory.length === 0) {
 					const emptyMessage = document.createElement('div');
 					emptyMessage.className = 'empty-inventory';
@@ -186,10 +177,57 @@
 				}
 			}
 
-			// Show more button functionality
 			document.getElementById('show-more-btn').addEventListener('click', () => {
 				alert('Загрузка дополнительных предметов...');
 			});
+
+			function sellItem(itemId, itemName, itemPrice) {
+				if (!confirm(`Вы уверены, что хотите продать ${itemName}?`)) {
+					return;
+				}
+
+				if (!sessionHeader) {
+					alert('Ошибка авторизации. Пожалуйста, перезагрузите страницу.');
+					return;
+				}
+
+				fetch(`https://jackhanmacsgolkgame.pythonanywhere.com/items/${itemId}/sell/`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+						...sessionHeader
+					},
+					body: JSON.stringify({})
+				})
+				.then(response => {
+					if (!response.ok) {
+						throw new Error(`HTTP error! Status: ${response.status}`);
+					}
+					return response.json();
+				})
+				.then(data => {
+					alert(`Предмет ${itemName} успешно выставлен на продажу!`);
+					
+					// Update user balance
+					const currentBalance = parseFloat(document.getElementById('user-balance').textContent);
+					const newBalance = currentBalance + parseFloat(itemPrice);
+					document.getElementById('user-balance').textContent = newBalance.toFixed(2);
+					
+					// Refresh inventory
+					toUser((user, sessionId) => {
+						if (user) {
+							const userData = Array.isArray(user) ? user[0] : user;
+							const inventoryCount = userData.inventory ? userData.inventory.length : 0;
+							document.getElementById('inventory-count').textContent = inventoryCount;
+							populateInventory(userData.inventory || []);
+						}
+					});
+				})
+				.catch(error => {
+					console.error('Error selling item:', error);
+					alert('Произошла ошибка при продаже предмета. Пожалуйста, попробуйте снова.');
+				});
+			}
 		</script>
 	</body>
 </html>

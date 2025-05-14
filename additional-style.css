@@ -1,0 +1,113 @@
+/* Additional styling for GLDROP website */
+
+/* Footer Styles */
+footer {
+  margin-top: 80px;
+  padding: 20px 0;
+  background-color: rgba(41, 38, 49, 0.5);
+  backdrop-filter: blur(5px);
+  border-top: 1px solid rgba(243, 164, 93, 0.2);
+}
+
+.footer-content {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* Case image container */
+.case-image {
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.case-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 70%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+/* Enhanced hover effects */
+.cases {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cases:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container .cases {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.container .cases:nth-child(1) { animation-delay: 0.1s; }
+.container .cases:nth-child(2) { animation-delay: 0.2s; }
+.container .cases:nth-child(3) { animation-delay: 0.3s; }
+.container .cases:nth-child(4) { animation-delay: 0.4s; }
+.container .cases:nth-child(5) { animation-delay: 0.5s; }
+.container .cases:nth-child(6) { animation-delay: 0.6s; }
+.container .cases:nth-child(7) { animation-delay: 0.7s; }
+.container .cases:nth-child(8) { animation-delay: 0.8s; }
+
+/* Header animation */
+.header h5 {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Button pulse effect */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(243, 164, 93, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(243, 164, 93, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(243, 164, 93, 0); }
+}
+
+.pressed-button {
+  animation: pulse 2s infinite;
+}
+
+/* Improved background */
+body {
+  background-image: linear-gradient(to bottom, #1a1921, #131218);
+  background-attachment: fixed;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23f3a45d10"/></svg>');
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Improved mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  footer {
+    margin-top: 40px;
+    padding: 15px 0;
+  }
+}
