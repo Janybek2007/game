@@ -111,3 +111,66 @@ body::before {
     padding: 15px 0;
   }
 }
+
+
+
+/* User Profile Styles */
+
+#user-profile {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  z-index: 10;
+}
+
+
+
+.profile-view {
+  display: flex;
+  align-items: center;
+  background-color: rgba(41, 38, 49, 0.8);
+  border-radius: 20px;
+  padding: 10px 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.profile-view:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.profile-avatar {
+  margin-right: 10px;
+}
+
+.profile-avatar img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid #f3a45d;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(243, 164, 93, 0.5);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-nickname {
+  color: white;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.profile-balance {
+  color: #f3a45d;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+}

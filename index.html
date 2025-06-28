@@ -4,15 +4,8 @@
 		<title>GLDROP</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style.css" />
-		<link rel="stylesheet" href="additional-style.css" />
-		<link rel="icon" href="logo.png" type="image/png" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap"
-			rel="stylesheet"
-		/>
+		<link rel="stylesheet" href="styles/global.css" />
+		<link rel="stylesheet" href="styles/additional-style.css" />
 	</head>
 	<body>
 		<header>
@@ -80,39 +73,51 @@
 				const container = document.querySelector('.container');
 				if (Array.isArray(cases)) {
 					cases.forEach(_case => {
-						const caseElement = document.createElement('a');
+						const caseElement = document.createElement('div');
 						caseElement.classList.add('cases');
-						caseElement.href = `case.html?id=${_case.id}`;
-						caseElement.style.textDecoration = 'none';
-						caseElement.innerHTML = `
+						// Сохраняем ID кейса как атрибут для всех пользователей
+						caseElement.setAttribute('data-case-id', _case.id);
+
+						// Проверяем авторизацию пользователя
+						const isLoggedIn =
+							document
+								.getElementById('user-profile')
+								.classList.contains('user-profile-hidden') === false;
+
+						// Создаем обертку для кейса
+						const caseWrapper = document.createElement('div');
+						caseWrapper.classList.add('case-wrapper');
+
+						// Если пользователь авторизован, делаем кейс кликабельным
+						if (isLoggedIn) {
+							const caseLink = document.createElement('a');
+							caseLink.href = `case.html?id=${_case.id}`;
+							caseLink.style.textDecoration = 'none';
+							caseLink.appendChild(caseWrapper);
+							caseElement.appendChild(caseLink);
+						} else {
+							caseElement.appendChild(caseWrapper);
+							// Добавляем оверлей с сообщением для неавторизованных пользователей
+							const overlay = document.createElement('div');
+							overlay.classList.add('case-overlay');
+							overlay.innerHTML =
+								'<div class="login-required">Войдите, чтобы открыть</div>';
+							caseElement.appendChild(overlay);
+						}
+
+						caseWrapper.innerHTML = `
 						<div class="case-image">
 							<img src="${_case.image}" alt="${_case.name}" />
 						</div>
 						<h2>${_case.name}</h2>
 						<h3>${_case.price}₽</h3>
-					`;
+						`;
 						container.appendChild(caseElement);
 					});
 				}
 			});
-			toUser(user => {
-				if (user) {
-					document.querySelector('.layer1').style.display = 'none';
 
-					const userProfile = document.getElementById('user-profile');
-					userProfile.classList.remove('user-profile-hidden');
-
-					const userData = Array.isArray(user) ? user[0] : user;
-
-					document.getElementById('user-avatar').src =
-						userData.avatar_url || '';
-					document.getElementById('user-nickname').textContent =
-						userData.nickname || 'User';
-					document.getElementById('user-balance').textContent = userData.balance
-						? `${userData.balance}₽`
-						: '0.00₽';
-				}
-			});
+			toUser(toUserProfileUI);
 		</script>
 	</body>
 </html>

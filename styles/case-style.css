@@ -1,0 +1,445 @@
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+:root {
+	--bg-primary: linear-gradient(to bottom, #1a1921, #131218);
+	--bg-secondary: #2c2a33;
+	--accent-primary: #9b59b6;
+	--accent-secondary: #e67e22;
+	--text-primary: #ecf0f1;
+	--text-secondary: #bdc3c7;
+	--legendary-color: #e67e22;
+	--shadow-color: rgba(0, 0, 0, 0.3);
+	--glow-color: rgba(155, 89, 182, 0.5);
+	--item-width: 160px;
+	--item-height: 150px;
+	/* Не изменяйте */
+	--item-gap: 10px;
+}
+
+body {
+	font-family: 'Inter', 'Roboto', sans-serif;
+	background: var(--bg-primary);
+	color: var(--text-primary);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 24px;
+	line-height: 1.5;
+}
+
+/* Единый размер для всех изображений */
+img {
+	max-width: 100px;
+	max-height: 100px;
+	object-fit: contain;
+}
+
+/* Миксин для общих стилей тени */
+@mixin box-shadow($shadow...) {
+	box-shadow: $shadow;
+}
+
+/* Миксин для анимации свечения */
+@mixin glow-animation($name: glow, $shadow-color: var(--glow-color)) {
+	@keyframes #{$name} {
+		0% {
+			box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+		}
+
+		50% {
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 0 6px $shadow-color;
+		}
+
+		100% {
+			box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+		}
+	}
+}
+
+/* Общие стили для карточек и элементов */
+.card-base {
+	background: var(--bg-secondary);
+	border-radius: 8px;
+	overflow: hidden;
+	@include box-shadow(0 3px 10px var(--shadow-color));
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+	&:hover {
+		transform: translateY(-3px);
+		@include box-shadow(0 5px 14px rgba(0, 0, 0, 0.4));
+	}
+}
+
+/* Container styles */
+.container {
+	max-width: 1440px;
+	width: 100%;
+	padding: 20px;
+}
+
+/* Header styles */
+.header {
+	text-align: center;
+	margin-bottom: 28px;
+
+	.title {
+		font-size: 2rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.8px;
+		color: var(--text-primary);
+		text-shadow: 0 0 8px var(--glow-color);
+	}
+
+	.subtitle {
+		font-size: 0.95rem;
+		color: var(--text-secondary);
+		font-weight: 400;
+		margin-top: 6px;
+	}
+}
+
+/* Spinner styles */
+.case-spinner {
+	position: relative;
+	height: 170px;
+	overflow: hidden;
+	@extend .card-base;
+	transform: translateZ(0);
+	will-change: transform;
+}
+
+.spinner-items {
+	display: flex;
+	height: 100%;
+	align-items: center;
+	gap: var(--item-gap);
+	will-change: transform;
+}
+
+.spinner-indicator-container {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	height: 100%;
+	width: 2px;
+	/* Уменьшена ширина для тонкой линии */
+	background: var(--accent-primary);
+	/* Цвет линии */
+	z-index: 10;
+	pointer-events: none;
+}
+
+.spinner-indicator {
+	display: none;
+	/* Убрана стрелка, так как теперь используется линия */
+}
+
+.spinner-item {
+	flex-shrink: 0;
+	width: var(--item-width);
+	height: var(--item-height);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	@extend .card-base;
+	border: 1px solid rgba(155, 89, 182, 0.2);
+	transform: translateZ(0);
+	will-change: transform, box-shadow;
+
+	&.winner {
+		border-color: var(--legendary-color);
+		background: var(--bg-secondary);
+		@include box-shadow(0 0 14px var(--legendary-color));
+		animation: glow 1.5s ease-in-out infinite alternate;
+		transform: scale(1.05);
+		z-index: 5;
+
+		.item-image {
+			transform: scale(1.05);
+			filter: brightness(1.15);
+		}
+	}
+}
+
+.item-image-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+.item-image {
+	border-radius: 6px;
+	transition: transform 0.2s ease;
+}
+
+.controls {
+	display: flex;
+	justify-content: center;
+	gap: 16px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+/* Case Items Section */
+.case-items-section {
+	margin-top: 40px;
+	width: 100%;
+}
+
+.section-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	text-align: center;
+	margin-bottom: 20px;
+	color: var(--text-primary);
+	text-transform: uppercase;
+}
+
+.items-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+	gap: 14px;
+}
+
+.item-card {
+	@extend .card-base;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid rgba(155, 89, 182, 0.2);
+
+	.item-image-container {
+		width: 100%;
+		height: 130px;
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	.item-details {
+		padding: 10px;
+		flex-grow: 1;
+	}
+
+	.item-name {
+		font-size: 1rem;
+		font-weight: 600;
+		text-align: center;
+		color: var(--text-primary);
+	}
+
+	.item-price {
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--accent-primary);
+		text-align: center;
+		margin-top: 4px;
+	}
+}
+
+/* Modal styles */
+.modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.75);
+	backdrop-filter: blur(6px);
+	z-index: 1000;
+	align-items: center;
+	justify-content: center;
+	transition: opacity 0.3s ease;
+
+	&.show {
+		display: flex;
+		opacity: 1;
+	}
+}
+
+.modal-content {
+	@extend .card-base;
+	max-width: 340px;
+	width: 90%;
+	padding: 28px;
+	border: 1px solid var(--accent-primary);
+	transform: scale(0.85);
+	opacity: 0;
+	transition: all 0.4s ease;
+
+	&.animate-content {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.modal-header {
+	padding: 14px;
+	text-align: center;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+	.modal-title {
+		font-size: 1.4rem;
+		font-weight: 600;
+		color: var(--accent-primary);
+	}
+}
+
+.modal-body {
+	padding: 20px;
+}
+
+.win-item-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+}
+
+.win-item-image-container {
+	width: 110px;
+	height: 110px;
+	border-radius: 6px;
+	background: var(--bg-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid var(--legendary-color);
+	@include box-shadow(0 0 10px var(--glow-color));
+	animation: glow 1.8s infinite;
+}
+
+.win-item-name {
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: var(--legendary-color);
+	text-align: center;
+}
+
+.modal-footer {
+	padding: 14px;
+	text-align: center;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.close-button {
+	background: var(--accent-primary);
+	color: var(--text-primary);
+	border: none;
+	padding: 10px 22px;
+	border-radius: 16px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	@include box-shadow(0 3px 10px rgba(0, 0, 0, 0.2));
+
+	&:hover {
+		transform: translateY(-2px);
+		@include box-shadow(0 5px 12px rgba(0, 0, 0, 0.3));
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+/* Animations */
+@include glow-animation(glow, var(--glow-color));
+
+@keyframes win-item-float {
+
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(-6px);
+	}
+}
+
+/* Стили для .spin-button (без изменений) */
+.spin-button {
+	--main-color: rgb(46, 213, 115);
+	--main-bg-color: rgba(46, 213, 116, 0.36);
+	--pattern-color: rgba(46, 213, 116, 0.073);
+	filter: hue-rotate(0deg);
+	cursor: pointer;
+	text-transform: uppercase;
+	letter-spacing: 0.5rem;
+	background: radial-gradient(circle, var(--main-bg-color) 0%, rgba(0, 0, 0, 0) 95%),
+		linear-gradient(var(--pattern-color) 1px, transparent 1px),
+		linear-gradient(to right, var(--pattern-color) 1px, transparent 1px);
+	background-size: cover, 15px 15px, 15px 15px;
+	background-position: center center, center center, center center;
+	border-image: radial-gradient(circle, var(--main-color) 0%, rgba(0, 0, 0, 0) 100%) 1;
+	border-width: 1px 0 1px 0;
+	color: var(--main-color);
+	padding: 1rem 4.5rem;
+	font-weight: 700;
+	font-size: 1.5rem;
+	transition: background-size 0.2s ease-in-out;
+	margin-top: 20px;
+}
+
+.spin-button:hover {
+	background-size: cover, 10px 10px, 10px 10px;
+}
+
+.spin-button:active {
+	filter: hue-rotate(250deg);
+}
+
+
+/* В начало файла case-style.css добавляем стили для hidden и анимаций */
+.hidden {
+	display: none;
+	opacity: 0;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.container>* {
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.header,
+.case-items-section,
+.case-spinner-container,
+.controls {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.header.hidden,
+.case-items-section.hidden {
+	opacity: 0;
+	transform: translateY(-20px);
+}
+
+.case-spinner-container:not(.hidden),
+.controls:not(.hidden) {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.case-spinner-container.hidden,
+.controls.hidden {
+	opacity: 0;
+	transform: translateY(20px);
+}

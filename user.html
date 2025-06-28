@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>User Inventory</title>
-		<link rel="stylesheet" href="user-style.css" />
+		<link rel="stylesheet" href="styles/user-style.css" />
 		<link rel="icon" href="logo.png" type="image/png" />
 	</head>
 	<body>
@@ -60,7 +60,6 @@
 
 		<template id="item-template">
 			<div class="inventory-item">
-				<div class="item-price"></div>
 				<div class="item-image-container">
 					<img class="item-image" src="" alt="Item" />
 				</div>
@@ -121,16 +120,15 @@
 				inventory.forEach(inventoryItem => {
 					const item = inventoryItem.item;
 					const itemElement = template.content.cloneNode(true);
+					const itemPrice = itemElement.querySelector('.item-price');
 
-					// Display price if available
-					if (inventoryItem.price_for_sale) {
-						itemElement.querySelector(
-							'.item-price'
-						).textContent = `${inventoryItem.price_for_sale}₽`;
-					} else {
-						itemElement.querySelector(
-							'.item-price'
-						).textContent = `${item.price || '0.00'}₽`;
+					if(itemPrice) {
+						// Display price if available
+						if (inventoryItem.price_for_sale) {
+							itemPrice.textContent = `${inventoryItem.price_for_sale}₽`;
+						} else {
+							itemPrice.textContent = `${item.price || '0.00'}₽`;
+						}
 					}
 
 					const imageUrl =
@@ -161,6 +159,7 @@
 						itemElement.querySelector('.item-details').appendChild(statusDiv);
 					} else {
 						// Item can be sold
+						sellButton.setAttribute('data-item-id', inventoryItem.id);
 						sellButton.addEventListener('click', () => {
 							sellItem(inventoryItem.id, item.name, item.price);
 						});
@@ -206,22 +205,43 @@
 					return response.json();
 				})
 				.then(data => {
-					alert(`Предмет ${itemName} успешно выставлен на продажу!`);
+					alert(`Предмет ${itemName} успешно продан!`);
 					
-					// Update user balance
+					// Update user balance without page reload
 					const currentBalance = parseFloat(document.getElementById('user-balance').textContent);
 					const newBalance = currentBalance + parseFloat(itemPrice);
 					document.getElementById('user-balance').textContent = newBalance.toFixed(2);
 					
-					// Refresh inventory
-					toUser((user, sessionId) => {
-						if (user) {
-							const userData = Array.isArray(user) ? user[0] : user;
-							const inventoryCount = userData.inventory ? userData.inventory.length : 0;
-							document.getElementById('inventory-count').textContent = inventoryCount;
-							populateInventory(userData.inventory || []);
+					// Update item status in the UI
+					const sellButton = document.querySelector(`[data-item-id="${itemId}"]`);
+					if (sellButton) {
+						const itemElement = sellButton.closest('.inventory-item');
+						
+						// Disable the sell button
+						sellButton.textContent = 'ПРОДАНО';
+						sellButton.disabled = true;
+						sellButton.classList.add('disabled-button');
+						
+						// Add status indicator
+						const statusDiv = document.createElement('div');
+						statusDiv.className = 'item-status';
+						statusDiv.textContent = 'продан';
+						itemElement.querySelector('.item-details').appendChild(statusDiv);
+					}
+					
+					// Update user data in session
+					fetch('https://jackhanmacsgolkgame.pythonanywhere.com/users/me/', {
+						method: 'GET',
+						headers: sessionHeader
+					})
+					.then(response => response.json())
+					.then(userData => {
+						// Store updated user data in session storage or other client-side storage if needed
+						if (typeof sessionStorage !== 'undefined') {
+							sessionStorage.setItem('userData', JSON.stringify(userData));
 						}
-					});
+					})
+					.catch(error => console.error('Error updating user data:', error));
 				})
 				.catch(error => {
 					console.error('Error selling item:', error);
