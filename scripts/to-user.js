@@ -60,7 +60,7 @@ function toUserProfileUI(user) {
 		}
 
 		const userProfile = document.getElementById('user-profile');
-		userProfile.classList.remove('user-profile-hidden');
+		userProfile.classList.remove('hidden');
 
 		const userData = Array.isArray(user) ? user[0] : user;
 
@@ -98,5 +98,7 @@ function toUserProfileUI(user) {
 				}
 			}
 		});
+	} else {
+		document.querySelector('#user-profile').style.display = 'none';
 	}
 }

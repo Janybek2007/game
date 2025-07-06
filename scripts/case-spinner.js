@@ -1,16 +1,16 @@
 class CaseSpinner {
 	static CONFIG = {
 		animation: {
-			minDuration: 4000,
-			maxDuration: 8000,
-			initialVelocity: 2000,
-			friction: 0.95,
-			minVelocity: 5
+			minDuration: 6000, // было 4000
+			maxDuration: 9000, // было 7000
+			initialVelocity: 1200, // было 2000
+			friction: 0.992, // было 0.97 — плавнее замедляется
+			minVelocity: 2 // можно немного уменьшить для более плавной остановки
 		},
 		items: {
 			width: 170,
-			repeats: 30,
-			targetRepeatIndex: 15
+			repeats: 15,
+			targetRepeatIndex: 8
 		},
 		sound: {
 			enabled: false,
@@ -97,8 +97,19 @@ class CaseSpinner {
 	 * Создание элемента предмета
 	 */
 	createItemElement(item, repeatIndex, itemIndex) {
+		let rarityClass = 'common';
+		const price = parseFloat(item.price);
+
+		if (price >= 5000) {
+			rarityClass = 'legendary';
+		} else if (price >= 1000) {
+			rarityClass = 'epic';
+		} else if (price >= 500) {
+			rarityClass = 'rare';
+		}
+
 		const itemEl = document.createElement('div');
-		itemEl.className = 'spinner-item';
+		itemEl.className = `spinner-item ${rarityClass}`;
 		itemEl.setAttribute('data-item-id', item.id);
 		itemEl.setAttribute('data-repeat', repeatIndex);
 		itemEl.setAttribute('data-index', itemIndex);
@@ -107,6 +118,7 @@ class CaseSpinner {
 		imageContainer.className = 'item-image-container';
 
 		const img = document.createElement('img');
+		img.classList.add('_item-image');
 		const imageSrc = this.getImageUrl(item);
 		if (!imageSrc) {
 			console.warn(
@@ -288,7 +300,7 @@ class CaseSpinner {
 	 * Применение easing функции
 	 */
 	applyEasing(t) {
-		return 1 - Math.pow(1 - t, 3);
+		return 1 - Math.pow(1 - t, 4.5);
 	}
 
 	/**

@@ -35,13 +35,13 @@
 			<div class="layer1">
 				<a
 					href="https://jackhanmacsgolkgame.pythonanywhere.com/ru/steam/login"
-					class="pressed-button"
+					class="pressed-button steam-login-button"
 				>
-					<img src="steam.png" class="button-icon" alt="Steam Icon" />
+					<img src="/images/steam.svg" class="button-icon" alt="Steam Icon" />
 					<h4 class="button-text">ВОЙТИ</h4>
 				</a>
 			</div>
-			<a href="user.html" id="user-profile" class="user-profile-hidden">
+			<a href="user.html" id="user-profile" class="user-profile hidden">
 				<div class="profile-view">
 					<div class="profile-avatar">
 						<img id="user-avatar" src="" alt="User Avatar" />
@@ -75,38 +75,19 @@
 					cases.forEach(_case => {
 						const caseElement = document.createElement('div');
 						caseElement.classList.add('cases');
-						// Сохраняем ID кейса как атрибут для всех пользователей
 						caseElement.setAttribute('data-case-id', _case.id);
 
-						// Проверяем авторизацию пользователя
-						const isLoggedIn =
-							document
-								.getElementById('user-profile')
-								.classList.contains('user-profile-hidden') === false;
-
-						// Создаем обертку для кейса
 						const caseWrapper = document.createElement('div');
 						caseWrapper.classList.add('case-wrapper');
 
-						// Если пользователь авторизован, делаем кейс кликабельным
-						if (isLoggedIn) {
-							const caseLink = document.createElement('a');
-							caseLink.href = `case.html?id=${_case.id}`;
-							caseLink.style.textDecoration = 'none';
-							caseLink.appendChild(caseWrapper);
-							caseElement.appendChild(caseLink);
-						} else {
-							caseElement.appendChild(caseWrapper);
-							// Добавляем оверлей с сообщением для неавторизованных пользователей
-							const overlay = document.createElement('div');
-							overlay.classList.add('case-overlay');
-							overlay.innerHTML =
-								'<div class="login-required">Войдите, чтобы открыть</div>';
-							caseElement.appendChild(overlay);
-						}
+						const caseLink = document.createElement('a');
+						caseLink.href = `case.html?id=${_case.id}`;
+						caseLink.style.textDecoration = 'none';
+						caseLink.appendChild(caseWrapper);
+						caseElement.appendChild(caseLink);
 
 						caseWrapper.innerHTML = `
-						<div class="case-image">
+						<div class="case-image simple-case-image">
 							<img src="${_case.image}" alt="${_case.name}" />
 						</div>
 						<h2>${_case.name}</h2>

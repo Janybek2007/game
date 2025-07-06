@@ -3,12 +3,21 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Case Spinner</title>
+		<title id="caseTitle">Кейс</title>
 		<link rel="stylesheet" href="styles/case-style.css" />
 		<link rel="stylesheet" href="styles/additional-style.css" />
 	</head>
 	<body>
-		<a href="user.html" id="user-profile" class="user-profile-hidden">
+		<div class="layer1">
+			<a
+				href="https://jackhanmacsgolkgame.pythonanywhere.com/ru/steam/login"
+				class="pressed-button steam-login-button"
+			>
+				<img src="images/steam.svg" class="button-icon" alt="Steam Icon" />
+				<h4 class="button-text">ВОЙТИ</h4>
+			</a>
+		</div>
+		<a href="user.html" id="user-profile" class="user-profile hidden">
 			<div class="profile-view">
 				<div class="profile-avatar">
 					<img id="user-avatar" src="" alt="User Avatar" />
@@ -21,8 +30,8 @@
 		</a>
 		<div class="container">
 			<div class="header" id="caseHeader">
-				<h1 class="title">Case Spinner</h1>
-				<p class="subtitle">Испытайте свою удачу и выиграйте редкие предметы</p>
+				<h1 id="caseName" class="case-name"></h1>
+				<img src="" alt="Case" id="caseImage" />
 			</div>
 
 			<div class="case-spinner-container hidden" id="caseSpinnerContainer">
@@ -34,7 +43,14 @@
 					</div>
 				</div>
 			</div>
-
+			<div class="login-notice-block" id="loginNoticeBlock">
+				<h4>ВЫ НЕ АВТОРИЗОВАНЫ!</h4>
+				<p>Для открытие кейса необходимое пройти авторизацию</p>
+			</div>
+			<a href="https://jackhanmacsgolkgame.pythonanywhere.com/ru/steam/login" class="login-notice" id="loginNotice">
+				<img src="images/steam-no-bg.svg" alt="Steam Icon">
+				Войдите, через Steam
+			</a>
 			<div class="controls" id="controls">
 				<button class="button spin-button" id="spinButton">Открыть</button>
 			</div>
@@ -68,7 +84,7 @@
 			</div>
 
 			<div class="case-items-section" id="caseItemsSection">
-				<h2 class="section-title">Предметы в кейсе</h2>
+				<h2 class="section-title" id="caseItemsTitle">Предметы в кейсе</h2>
 				<div class="items-grid" id="caseItemsGrid">
 					<!-- Items will be loaded here dynamically -->
 				</div>
@@ -76,13 +92,18 @@
 		</div>
 
 		<script src="./scripts/to-user.js"></script>
-		<script src="./scripts/case-spinner.js"></script>
+		<script src="./scripts/case-spinner.v2.js"></script>
 		<script src="./scripts/to-case.js"></script>
 		<script>
 			toUser((user, headers) => {
 				if (!user) {
-					window.location.pathname = '/';
-					return;
+					const loginNotice = document.getElementById('loginNotice');
+					const loginNoticeBlock = document.getElementById('loginNoticeBlock');
+					const spinButton = document.getElementById('spinButton');
+					
+					loginNoticeBlock.style.display = 'flex'
+					loginNotice.style.display = 'flex';
+					spinButton.style.display = "none"
 				}
 			});
 			toUser(toUserProfileUI);
@@ -97,23 +118,44 @@
 
 				sortedItems.forEach(itemData => {
 					const item = itemData.item;
+					let rarityClass = 'common';
+					const price = parseFloat(item.price);
+					if (price >= 5000) {
+						rarityClass = 'legendary';
+					} else if (price >= 1000) {
+						rarityClass = 'epic';
+					} else if (price >= 500) {
+						rarityClass = 'rare';
+					}
+
 					const itemElement = document.createElement('div');
-					itemElement.className = 'item-card';
+					itemElement.className = `item-card ${rarityClass}`;
 					const imageUrl =
 						item.item_image && item.item_image.length > 0
 							? item.item_image[0].image
 							: 'default-weapon.png';
 					itemElement.innerHTML = `
-                        <div class="item-image-container">
-                            <img src="${imageUrl}" alt="${item.name}" class="item-image">
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name">${item.name}</h3>
-                            <div class="item-price">${item.price}₽</div>
-                        </div>
-                    `;
+						<div class="item-image-container">
+							<img src="${imageUrl}" alt="${item.name}" class="item-image">
+						</div>
+						<div class="item-details">
+							<h3 class="item-name">${item.name}</h3>
+							<div class="item-price">${item.price}₽</div>
+						</div>
+					`;
 					itemsGrid.appendChild(itemElement);
 				});
+
+				// Устанавливаем название кейса в заголовок страницы и в элемент
+				document.getElementById('caseTitle').textContent = caseData.name;
+				const caseNameElement = document.getElementById('caseName');
+				if (caseNameElement) {
+					caseNameElement.textContent = caseData.name;
+				}
+
+				const caseImage = document.getElementById('caseImage');
+				caseImage.src = caseData.image;
+				caseImage.alt = caseData.name;
 
 				let caseSpinner = null;
 
@@ -122,9 +164,22 @@
 						id: itemData.item.id,
 						name: itemData.item.name,
 						images: itemData.item.item_image || [],
-						price: itemData.item.price
+						price: itemData.item.price,
+						rarityClass: getRarityClass(itemData.item.price)
 					}));
 					caseSpinner = new CaseSpinner(caseData, items, headers);
+				}
+
+				function getRarityClass(price) {
+					let rarityClass = 'common';
+					if (price >= 5000) {
+						rarityClass = 'legendary';
+					} else if (price >= 1000) {
+						rarityClass = 'epic';
+					} else if (price >= 500) {
+						rarityClass = 'rare';
+					}
+					return rarityClass;
 				}
 
 				function showSpinner() {
@@ -136,7 +191,6 @@
 					const controls = document.getElementById('controls');
 
 					caseHeader.classList.add('hidden');
-					caseItemsSection.classList.add('hidden');
 
 					caseSpinnerContainer.classList.remove('hidden');
 					controls.classList.add('hidden');

@@ -73,7 +73,6 @@
 			</div>
 		</template>
 
-		
 		<style>
 			.disabled-button {
 				background-color: #888;
@@ -122,8 +121,7 @@
 					const itemElement = template.content.cloneNode(true);
 					const itemPrice = itemElement.querySelector('.item-price');
 
-					if(itemPrice) {
-						// Display price if available
+					if (itemPrice) {
 						if (inventoryItem.price_for_sale) {
 							itemPrice.textContent = `${inventoryItem.price_for_sale}₽`;
 						} else {
@@ -136,29 +134,26 @@
 							? item.item_image[0].image
 							: 'default-weapon.png';
 
-					itemElement.querySelector('.item-image').src =
-						imageUrl.includes('http')
-							? imageUrl
-							: `https://jackhanmacsgolkgame.pythonanywhere.com${imageUrl}`;
+					itemElement.querySelector('.item-image').src = imageUrl.includes(
+						'http'
+					)
+						? imageUrl
+						: `https://jackhanmacsgolkgame.pythonanywhere.com${imageUrl}`;
 
 					itemElement.querySelector('.item-type').textContent = 'P2000';
 					itemElement.querySelector('.item-name').textContent = item.name;
 
-					// Check item status
 					const sellButton = itemElement.querySelector('.sell-button');
 					if (inventoryItem.status === 'продан' || inventoryItem.status) {
-						// Item is already for sale or has another status
 						sellButton.textContent = 'ПРОДАНО';
 						sellButton.disabled = true;
 						sellButton.classList.add('disabled-button');
-						
-						// Add status indicator
+
 						const statusDiv = document.createElement('div');
 						statusDiv.className = 'item-status';
 						statusDiv.textContent = inventoryItem.status || 'Статус неизвестен';
 						itemElement.querySelector('.item-details').appendChild(statusDiv);
 					} else {
-						// Item can be sold
 						sellButton.setAttribute('data-item-id', inventoryItem.id);
 						sellButton.addEventListener('click', () => {
 							sellItem(inventoryItem.id, item.name, item.price);
@@ -190,63 +185,69 @@
 					return;
 				}
 
-				fetch(`https://jackhanmacsgolkgame.pythonanywhere.com/items/${itemId}/sell/`, {
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-						...sessionHeader
-					},
-					body: JSON.stringify({})
-				})
-				.then(response => {
-					if (!response.ok) {
-						throw new Error(`HTTP error! Status: ${response.status}`);
+				fetch(
+					`https://jackhanmacsgolkgame.pythonanywhere.com/items/${itemId}/sell/`,
+					{
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json',
+							...sessionHeader
+						},
+						body: JSON.stringify({})
 					}
-					return response.json();
-				})
-				.then(data => {
-					alert(`Предмет ${itemName} успешно продан!`);
-					
-					// Update user balance without page reload
-					const currentBalance = parseFloat(document.getElementById('user-balance').textContent);
-					const newBalance = currentBalance + parseFloat(itemPrice);
-					document.getElementById('user-balance').textContent = newBalance.toFixed(2);
-					
-					// Update item status in the UI
-					const sellButton = document.querySelector(`[data-item-id="${itemId}"]`);
-					if (sellButton) {
-						const itemElement = sellButton.closest('.inventory-item');
-						
-						// Disable the sell button
-						sellButton.textContent = 'ПРОДАНО';
-						sellButton.disabled = true;
-						sellButton.classList.add('disabled-button');
-						
-						// Add status indicator
-						const statusDiv = document.createElement('div');
-						statusDiv.className = 'item-status';
-						statusDiv.textContent = 'продан';
-						itemElement.querySelector('.item-details').appendChild(statusDiv);
-					}
-					
-					// Update user data in session
-					fetch('https://jackhanmacsgolkgame.pythonanywhere.com/users/me/', {
-						method: 'GET',
-						headers: sessionHeader
-					})
-					.then(response => response.json())
-					.then(userData => {
-						// Store updated user data in session storage or other client-side storage if needed
-						if (typeof sessionStorage !== 'undefined') {
-							sessionStorage.setItem('userData', JSON.stringify(userData));
+				)
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(`HTTP error! Status: ${response.status}`);
 						}
+						return response.json();
 					})
-					.catch(error => console.error('Error updating user data:', error));
-				})
-				.catch(error => {
-					console.error('Error selling item:', error);
-					alert('Произошла ошибка при продаже предмета. Пожалуйста, попробуйте снова.');
-				});
+					.then(data => {
+						alert(`Предмет ${itemName} успешно продан!`);
+
+						const responseData = {
+							balance: data.balance,
+							message: data.message
+						};
+						document.getElementById('user-balance').textContent =
+							responseData.balance;
+
+						const sellButton = document.querySelector(
+							`[data-item-id="${itemId}"]`
+						);
+						if (sellButton) {
+							const itemElement = sellButton.closest('.inventory-item');
+
+							sellButton.textContent = 'ПРОДАНО';
+							sellButton.disabled = true;
+							sellButton.classList.add('disabled-button');
+
+							const statusDiv = document.createElement('div');
+							statusDiv.className = 'item-status';
+							statusDiv.textContent = 'продан';
+							itemElement.querySelector('.item-details').appendChild(statusDiv);
+						}
+
+						fetch('https://jackhanmacsgolkgame.pythonanywhere.com/user/', {
+							method: 'GET',
+							headers: sessionHeader
+						})
+							.then(response => response.json())
+							.then(userData => {
+								if (typeof sessionStorage !== 'undefined') {
+									sessionStorage.setItem('userData', JSON.stringify(userData));
+								}
+							})
+							.catch(error =>
+								console.error('Error updating user data:', error)
+							);
+					})
+					.catch(error => {
+						console.error('Error selling item:', error);
+						alert(
+							'Произошла ошибка при продаже предмета. Пожалуйста, попробуйте снова.'
+						);
+					});
 			}
 		</script>
 	</body>

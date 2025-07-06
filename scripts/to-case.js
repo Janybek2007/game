@@ -20,7 +20,8 @@ function toCase(callback) {
 				const items = _case.items.map(({ item }) => ({
 					id: item.id,
 					name: item.name,
-					image: item.item_image[0].image
+					image: item.item_image[0].image,
+					price: item.price
 				}));
 				callback(_case, items, headers);
 			})
