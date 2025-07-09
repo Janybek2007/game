@@ -1,62 +1,117 @@
+/**
+ * CaseSpinner - Современная версия спиннера для кейсов с гибкой конфигурацией
+ * @version 2.0.0
+ */
 class CaseSpinner {
-	static CONFIG = {
+	// Конфигурация спиннера с современным подходом и гибкостью
+	static DEFAULT_CONFIG = {
 		animation: {
-			minDuration: 6000, // было 4000
-			maxDuration: 9000, // было 7000
-			initialVelocity: 1200, // было 2000
-			friction: 0.992, // было 0.97 — плавнее замедляется
-			minVelocity: 2 // можно немного уменьшить для более плавной остановки
+			minDuration: 6000, // Минимальная длительность анимации в миллисекундах
+			maxDuration: 9000, // Максимальная длительность анимации в миллисекундах
+			initialVelocity: 1200, // Начальная скорость прокрутки (px/s)
+			friction: 0.992, // Коэффициент трения для замедления (0-1)
+			minVelocity: 2, // Минимальная скорость для остановки (px/s)
+			easing: 'power4.out' // Тип функции смягчения (easing function)
 		},
-		items: {
-			width: 170,
-			repeats: 15,
-			targetRepeatIndex: 8
+		layout: {
+			itemWidth: 170, // Ширина одного предмета в пикселях
+			repeats: 5, // Количество повторов полного набора предметов, будет переопределено в зависимости от items
+			targetRepeatIndex: 3, // Целевой индекс повтора для остановки, будет переопределено в зависимости от items
+			centerOffset: 0 // Смещение центра остановки (в пикселях)
 		},
-		sound: {
-			enabled: false,
-			spinSound: null,
-			winSound: null
+		ui: {
+			spinnerId: 'caseSpinner', // ID элемента спиннера
+			itemsContainerId: 'spinnerItems', // ID контейнера для предметов
+			spinButtonId: 'spinButton', // ID кнопки запуска
+			resultContainerId: 'resultContainer', // ID контейнера результата
+			resultItemId: 'resultItem', // ID элемента результата
+			winModalId: 'winModal', // ID модального окна выигрыша
+			winItemImageId: 'winItemImage', // ID изображения в модальном окне
+			winItemNameId: 'winItemName', // ID названия предмета в модальном окне
+			closeModalButtonId: 'closeModalButton' // ID кнопки закрытия модального окна
+		},
+		api: {
+			openCaseEndpoint:
+				'https://jackhanmacsgolkgame.pythonanywhere.com/en/cases/{caseId}/open/', // Эндпоинт для открытия кейса
+			credentials: 'include', // Использовать куки для авторизации
+			headers: {
+				'Content-Type': 'application/json'
+			}
 		}
 	};
 
-	constructor(caseData, items, headers) {
+	constructor(caseData, items, headers = {}, customConfig = {}) {
+		// Слияние дефолтной конфигурации с пользовательской
+		this.config = { ...CaseSpinner.DEFAULT_CONFIG, ...customConfig };
 		this.case = caseData;
 		this.items = items.map(item => ({
-			...item,
-			images: item.images || [item.image]
+			id: item.id,
+			name: item.name,
+			image: this.normalizeImageUrl(
+				item.image || (item.images && item.images[0])
+			),
+			price: item.price,
+			rarityClass: this.getRarityClass(item.price)
 		}));
 		this.headers = headers;
 
-		this.initDOMElements();
+		this.adjustLayoutBasedOnItems();
 
+		// Состояние спиннера
 		this.isSpinning = false;
 		this.animationId = null;
 		this.currentPosition = 0;
 		this.velocity = 0;
 		this.targetPosition = 0;
 		this.winningIndex = 0;
-
 		this.startTime = 0;
 		this.duration = 0;
 
+		// Инициализация
+		this.initDOMElements();
 		this.init();
 	}
 
 	/**
-	 * Инициализация DOM элементов
+	 * Нормализация URL изображения
+	 * @param {string|object} image - URL или объект изображения
+	 * @returns {string} - Нормализованный URL
+	 */
+	normalizeImageUrl(image) {
+		if (typeof image === 'string') return image;
+		if (image && typeof image === 'object' && image.image) return image.image;
+		return '';
+	}
+
+	/**
+	 * Определение класса редкости на основе цены
+	 * @param {string|number} price - Цена предмета
+	 * @returns {string} - Класс редкости
+	 */
+	getRarityClass(price) {
+		const priceValue = parseFloat(price);
+		if (priceValue >= 5000) return 'legendary';
+		if (priceValue >= 1000) return 'epic';
+		if (priceValue >= 500) return 'rare';
+		return 'common';
+	}
+
+	/**
+	 * Инициализация DOM элементов на основе конфигурации
 	 */
 	initDOMElements() {
-		this.spinnerEl = document.getElementById('caseSpinner');
-		this.itemsEl = document.getElementById('spinnerItems');
-		this.spinButton = document.getElementById('spinButton');
-		this.resultContainer = document.getElementById('resultContainer');
-		this.resultItem = document.getElementById('resultItem');
-
-		this.winModal = document.getElementById('winModal');
-		this.winItemImage = document.getElementById('winItemImage');
-		this.winItemName = document.getElementById('winItemName');
-		this.closeModalButton = document.getElementById('closeModalButton');
-		this.spinButton = document.getElementById('spinButton');
+		const uiConfig = this.config.ui;
+		this.spinnerEl = document.getElementById(uiConfig.spinnerId);
+		this.itemsEl = document.getElementById(uiConfig.itemsContainerId);
+		this.spinButton = document.getElementById(uiConfig.spinButtonId);
+		this.resultContainer = document.getElementById(uiConfig.resultContainerId);
+		this.resultItem = document.getElementById(uiConfig.resultItemId);
+		this.winModal = document.getElementById(uiConfig.winModalId);
+		this.winItemImage = document.getElementById(uiConfig.winItemImageId);
+		this.winItemName = document.getElementById(uiConfig.winItemNameId);
+		this.closeModalButton = document.getElementById(
+			uiConfig.closeModalButtonId
+		);
 	}
 
 	/**
@@ -69,13 +124,14 @@ class CaseSpinner {
 	}
 
 	/**
-	 * Генерация предметов в ленте
+	 * Генерация предметов в ленте спиннера
 	 */
 	generateItems() {
 		this.itemsEl.innerHTML = '';
 		const fragment = document.createDocumentFragment();
+		const repeats = this.config.layout.repeats;
 
-		for (let repeat = 0; repeat < CaseSpinner.CONFIG.items.repeats; repeat++) {
+		for (let repeat = 0; repeat < repeats; repeat++) {
 			this.items.forEach((item, index) => {
 				const itemEl = this.createItemElement(item, repeat, index);
 				fragment.appendChild(itemEl);
@@ -85,31 +141,16 @@ class CaseSpinner {
 		this.itemsEl.appendChild(fragment);
 	}
 
-	getImageUrl(item) {
-		return item.images && item.images.length > 0 && item.images[0].image
-			? item.images[0].image
-			: item.image && typeof item.image === 'object' && item.image.image
-			? item.image.image
-			: '';
-	}
-
 	/**
-	 * Создание элемента предмета
+	 * Создание DOM элемента для предмета
+	 * @param {object} item - Данные предмета
+	 * @param {number} repeatIndex - Индекс повтора
+	 * @param {number} itemIndex - Индекс предмета
+	 * @returns {HTMLElement} - Элемент предмета
 	 */
 	createItemElement(item, repeatIndex, itemIndex) {
-		let rarityClass = 'common';
-		const price = parseFloat(item.price);
-
-		if (price >= 5000) {
-			rarityClass = 'legendary';
-		} else if (price >= 1000) {
-			rarityClass = 'epic';
-		} else if (price >= 500) {
-			rarityClass = 'rare';
-		}
-
 		const itemEl = document.createElement('div');
-		itemEl.className = `spinner-item ${rarityClass}`;
+		itemEl.className = `spinner-item ${item.rarityClass}`;
 		itemEl.setAttribute('data-item-id', item.id);
 		itemEl.setAttribute('data-repeat', repeatIndex);
 		itemEl.setAttribute('data-index', itemIndex);
@@ -118,21 +159,18 @@ class CaseSpinner {
 		imageContainer.className = 'item-image-container';
 
 		const img = document.createElement('img');
-		img.classList.add('_item-image');
-		const imageSrc = this.getImageUrl(item);
-		if (!imageSrc) {
+		img.classList.add('item-image');
+		if (!item.image) {
 			console.warn(
 				`Нет изображения для предмета id=${item.id}, name=${item.name}`
 			);
 		}
-		img.src = imageSrc;
+		img.src = item.image || '';
 		img.alt = item.name;
-		img.className = 'item-image';
 		img.loading = 'lazy';
 
 		imageContainer.appendChild(img);
 		itemEl.appendChild(imageContainer);
-
 		return itemEl;
 	}
 
@@ -140,7 +178,9 @@ class CaseSpinner {
 	 * Подключение обработчиков событий
 	 */
 	attachEventListeners() {
-		this.spinButton.addEventListener('click', () => this.spin());
+		if (this.spinButton) {
+			this.spinButton.addEventListener('click', () => this.spin());
+		}
 		if (this.closeModalButton) {
 			this.closeModalButton.addEventListener('click', () => this.closeModal());
 		}
@@ -187,13 +227,13 @@ class CaseSpinner {
 		if (this.isSpinning) return;
 
 		this.isSpinning = true;
-		this.spinButton.disabled = true;
+		if (this.spinButton) {
+			this.spinButton.disabled = true;
+		}
 		if (this.resultContainer) {
 			this.resultContainer.classList.remove('show');
 		}
 		this.resetPosition();
-
-		this.playSound('spin');
 
 		try {
 			const winningItem = await this.fetchWinningItem();
@@ -208,23 +248,26 @@ class CaseSpinner {
 
 	/**
 	 * Получение выигрышного предмета через API
+	 * @returns {Promise<object>} - Данные выигрышного предмета
 	 */
 	async fetchWinningItem() {
 		const caseId = getCaseId();
-		const response = await fetch(
-			`https://jackhanmacsgolkgame.pythonanywhere.com/en/cases/${caseId}/open/`,
-			{
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-					...this.headers
-				}
-			}
+		if (!caseId) throw new Error('ID кейса не найден');
+
+		const endpoint = this.config.api.openCaseEndpoint.replace(
+			'{caseId}',
+			caseId
 		);
+		const response = await fetch(endpoint, {
+			method: 'POST',
+			credentials: this.config.api.credentials,
+			headers: {
+				...this.config.api.headers,
+				...this.headers
+			}
+		});
 
 		const data = await response.json();
-
 		if (!response.ok) {
 			throw new Error(data.detail || data.error || 'Не удалось открыть кейс');
 		}
@@ -234,6 +277,7 @@ class CaseSpinner {
 
 	/**
 	 * Настройка параметров анимации
+	 * @param {object} winningItem - Выигрышный предмет
 	 */
 	setupAnimation(winningItem) {
 		const itemIndex = this.items.findIndex(item => item.id == winningItem.id);
@@ -242,22 +286,22 @@ class CaseSpinner {
 		}
 
 		this.winningIndex =
-			CaseSpinner.CONFIG.items.targetRepeatIndex * this.items.length +
-			itemIndex;
+			this.config.layout.targetRepeatIndex * this.items.length + itemIndex;
 
 		const spinnerRect = this.spinnerEl.getBoundingClientRect();
 		const spinnerCenter = spinnerRect.width / 2;
 
 		this.targetPosition =
-			-(this.winningIndex * CaseSpinner.CONFIG.items.width) +
+			-(this.winningIndex * this.config.layout.itemWidth) +
 			spinnerCenter -
-			CaseSpinner.CONFIG.items.width / 2;
+			this.config.layout.itemWidth / 2 +
+			this.config.layout.centerOffset;
 
-		const offset = (Math.random() * 0.8 - 0.4) * CaseSpinner.CONFIG.items.width;
+		const offset = (Math.random() * 0.8 - 0.4) * this.config.layout.itemWidth;
 		this.targetPosition += offset;
 
 		this.duration = this.getRandomDuration();
-		this.velocity = CaseSpinner.CONFIG.animation.initialVelocity;
+		this.velocity = this.config.animation.initialVelocity;
 		this.startTime = performance.now();
 	}
 
@@ -270,13 +314,13 @@ class CaseSpinner {
 
 	/**
 	 * Основной цикл анимации
+	 * @param {number} currentTime - Текущее время
 	 */
 	animate(currentTime) {
 		const elapsed = currentTime - this.startTime;
 		const progress = Math.min(elapsed / this.duration, 1);
 
-		this.animateMainPhase(progress, currentTime);
-
+		this.animateMainPhase(progress);
 		this.updatePosition();
 
 		if (progress < 1) {
@@ -288,23 +332,37 @@ class CaseSpinner {
 
 	/**
 	 * Анимация основной фазы
+	 * @param {number} progress - Прогресс анимации (0-1)
 	 */
 	animateMainPhase(progress) {
-		const easedProgress = this.applyEasing(progress);
-		let position = this.targetPosition * easedProgress;
-
-		this.currentPosition = position;
+		const easedProgress = this.applyEasing(
+			progress,
+			this.config.animation.easing
+		);
+		this.currentPosition = this.targetPosition * easedProgress;
 	}
 
 	/**
-	 * Применение easing функции
+	 * Применение функции смягчения (easing)
+	 * @param {number} t - Прогресс (0-1)
+	 * @param {string} type - Тип функции смягчения
+	 * @returns {number} - Скорректированный прогресс
 	 */
-	applyEasing(t) {
-		return 1 - Math.pow(1 - t, 4.5);
+	applyEasing(t, type = 'power4.out') {
+		switch (type) {
+			case 'power4.out':
+				return 1 - Math.pow(1 - t, 4.5);
+			case 'power3.out':
+				return 1 - Math.pow(1 - t, 3);
+			case 'linear':
+				return t;
+			default:
+				return 1 - Math.pow(1 - t, 4.5);
+		}
 	}
 
 	/**
-	 * Обновление позиции элемента
+	 * Обновление позиции спиннера
 	 */
 	updatePosition() {
 		this.itemsEl.style.transform = `translate3d(${Math.round(
@@ -318,9 +376,7 @@ class CaseSpinner {
 	finishAnimation() {
 		this.currentPosition = this.targetPosition;
 		this.updatePosition();
-
 		this.highlightWinner();
-		this.playSound('win');
 
 		setTimeout(() => {
 			this.showWinModal();
@@ -339,10 +395,9 @@ class CaseSpinner {
 
 		if (winnerItem) {
 			winnerItem.classList.add('winner');
-
 			if (this.resultItem) {
 				const itemId = winnerItem.getAttribute('data-item-id');
-				const item = this.items.find(item => item.id == itemId);
+				const item = this.items.find(i => i.id == itemId);
 				this.resultItem.textContent = item?.name || 'Неизвестный предмет';
 			}
 		} else {
@@ -364,13 +419,12 @@ class CaseSpinner {
 			const itemId = winnerElement.getAttribute('data-item-id');
 			const winnerItem = this.items.find(item => item.id == itemId);
 			if (winnerItem) {
-				const imageSrc = this.getImageUrl(winnerItem);
-				if (!imageSrc) {
+				if (!winnerItem.image) {
 					console.warn(
 						`Нет изображения для выигранного предмета id=${itemId}, name=${winnerItem.name}`
 					);
 				}
-				this.winItemImage.src = imageSrc;
+				this.winItemImage.src = winnerItem.image || '';
 				this.winItemImage.alt = winnerItem.name;
 				this.winItemName.textContent = winnerItem.name;
 				this.winModal.classList.add('show');
@@ -408,13 +462,15 @@ class CaseSpinner {
 		const controls = document.getElementById('controls');
 		const resultContainer = document.getElementById('resultContainer');
 
-		caseHeader.classList.remove('hidden');
-		caseItemsSection.classList.remove('hidden');
-		caseSpinnerContainer.classList.add('hidden');
-		controls.classList.remove('hidden');
-		resultContainer.classList.add('hidden');
+		if (caseHeader) caseHeader.classList.remove('hidden');
+		if (caseItemsSection) caseItemsSection.classList.remove('hidden');
+		if (caseSpinnerContainer) caseSpinnerContainer.classList.add('hidden');
+		if (controls) controls.classList.remove('hidden');
+		if (resultContainer) resultContainer.classList.add('hidden');
 
-		this.spinButton.textContent = 'Открыть';
+		if (this.spinButton) {
+			this.spinButton.textContent = 'Открыть';
+		}
 	}
 
 	/**
@@ -422,8 +478,9 @@ class CaseSpinner {
 	 */
 	stopSpinning() {
 		this.isSpinning = false;
-		this.spinButton.disabled = false;
-
+		if (this.spinButton) {
+			this.spinButton.disabled = false;
+		}
 		if (this.animationId) {
 			cancelAnimationFrame(this.animationId);
 			this.animationId = null;
@@ -447,30 +504,31 @@ class CaseSpinner {
 	}
 
 	/**
-	 * Воспроизведение звука
+	 * Динамическая настройка repeats и targetRepeatIndex на основе количества предметов
 	 */
-	playSound(type) {
-		if (!CaseSpinner.CONFIG.sound.enabled) return;
-
-		const soundPath = CaseSpinner.CONFIG.sound[`${type}Sound`];
-		if (soundPath) {
-			try {
-				const audio = new Audio(soundPath);
-				audio.volume = 0.5;
-				audio
-					.play()
-					.catch(e => console.log(`Не удалось воспроизвести звук ${type}:`, e));
-			} catch (error) {
-				console.log(`Ошибка при создании аудио ${type}:`, error);
-			}
+	adjustLayoutBasedOnItems() {
+		const itemCount = this.items.length;
+		if (itemCount < 5) {
+			this.config.layout.repeats = 20;
+			this.config.layout.targetRepeatIndex = 10;
+		} else if (itemCount < 10) {
+			this.config.layout.repeats = 15;
+			this.config.layout.targetRepeatIndex = 8;
+		} else if (itemCount < 15) {
+			this.config.layout.repeats = 12;
+			this.config.layout.targetRepeatIndex = 6;
+		} else {
+			this.config.layout.repeats = 3;
+			this.config.layout.targetRepeatIndex = 1;
 		}
 	}
 
 	/**
 	 * Получение случайной длительности анимации
+	 * @returns {number} - Длительность в миллисекундах
 	 */
 	getRandomDuration() {
-		const { minDuration, maxDuration } = CaseSpinner.CONFIG.animation;
+		const { minDuration, maxDuration } = this.config.animation;
 		return minDuration + Math.random() * (maxDuration - minDuration);
 	}
 }
