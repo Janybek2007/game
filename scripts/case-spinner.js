@@ -6,18 +6,18 @@ class CaseSpinner {
 	// Конфигурация спиннера с современным подходом и гибкостью
 	static DEFAULT_CONFIG = {
 		animation: {
-			minDuration: 6000, // Минимальная длительность анимации в миллисекундах
-			maxDuration: 9000, // Максимальная длительность анимации в миллисекундах
-			initialVelocity: 1200, // Начальная скорость прокрутки (px/s)
-			friction: 0.992, // Коэффициент трения для замедления (0-1)
-			minVelocity: 2, // Минимальная скорость для остановки (px/s)
-			easing: 'power4.out' // Тип функции смягчения (easing function)
+			minDuration: 9000, // Увеличено с 7000 до 9000 мс (+2 секунды)
+			maxDuration: 12000, // Увеличено с 9000 до 12000 мс (+3 секунды)
+			initialVelocity: 600,
+			friction: 0.992,
+			minVelocity: 2,
+			easing: 'power4.out'
 		},
 		layout: {
-			itemWidth: 170, // Ширина одного предмета в пикселях
-			repeats: 5, // Количество повторов полного набора предметов, будет переопределено в зависимости от items
-			targetRepeatIndex: 3, // Целевой индекс повтора для остановки, будет переопределено в зависимости от items
-			centerOffset: 0 // Смещение центра остановки (в пикселях)
+			itemWidth: 170,
+			repeats: 5,
+			targetRepeatIndex: 3,
+			centerOffset: 0
 		},
 		ui: {
 			spinnerId: 'caseSpinner', // ID элемента спиннера
@@ -504,22 +504,30 @@ class CaseSpinner {
 	}
 
 	/**
-	 * Динамическая настройка repeats и targetRepeatIndex на основе количества предметов
+	 * Динамическая настройка repeats, targetRepeatIndex и initialVelocity на основе количества предметов
 	 */
 	adjustLayoutBasedOnItems() {
 		const itemCount = this.items.length;
-		if (itemCount < 5) {
-			this.config.layout.repeats = 20;
-			this.config.layout.targetRepeatIndex = 10;
-		} else if (itemCount < 10) {
-			this.config.layout.repeats = 15;
-			this.config.layout.targetRepeatIndex = 8;
+		if (itemCount < 10) {
+			console.log('itemCount < 10');
+			this.config.layout.repeats = 18;
+			this.config.layout.targetRepeatIndex = 9;
+			this.config.animation.initialVelocity = 400;
 		} else if (itemCount < 15) {
-			this.config.layout.repeats = 12;
-			this.config.layout.targetRepeatIndex = 6;
+			console.log('itemCount < 15');
+			this.config.layout.repeats = 14;
+			this.config.layout.targetRepeatIndex = 7;
+			this.config.animation.initialVelocity = 300;
+		} else if (itemCount < 20) {
+			console.log('itemCount < 20');
+			this.config.layout.repeats = 10;
+			this.config.layout.targetRepeatIndex = 5;
+			this.config.animation.initialVelocity = 200; // Уменьшенная скорость
 		} else {
-			this.config.layout.repeats = 3;
+			console.log('itemCount > 20');
+			this.config.layout.repeats = 2;
 			this.config.layout.targetRepeatIndex = 1;
+			this.config.animation.initialVelocity = 100; // Минимальная скорость для большого числа элементов
 		}
 	}
 

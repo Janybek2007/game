@@ -97,42 +97,6 @@ img {
 	letter-spacing: 1px;
 }
 
-.login-notice-block {
-	display: none;
-	flex-direction: column;
-	border-radius: 6px;
-	padding: 10px;
-	background-color: #fca72340;
-	backdrop-filter: blur(10px);
-	max-width: 400px;
-	width: 100%;
-	margin: 25px auto;
-	text-align: center;
-}
-
-.login-notice {
-	background-color: #e88c2c;
-	color: white;
-	background-position: 100% 0;
-	background-size: 200% 200%;
-	width: min-content;
-	text-wrap: nowrap;
-	align-items: center;
-	gap: 8px;
-	margin: 0 auto;
-	padding: 10px 20px;
-	border-radius: 5px;
-	margin-top: 15px;
-	font-weight: 500;
-	display: none;
-	text-align: center;
-	text-decoration: none;
-	box-shadow: 0 4px 15px rgba(243, 164, 93, 0.4);
-}
-.login-notice img {
-	width: 30px;
-}
-
 /* Spinner styles */
 .case-spinner {
 	position: relative;
